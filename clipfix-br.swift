@@ -1,13 +1,34 @@
 // clipfix-br.swift
-// 클립보드의 HTML에서 </span> 태그 뒤에 <br> 태그를 삽입하여 줄바꿈을 추가한다.
+// 클립보드의 HTML에서 텍스트 콘텐츠 내의 줄바꿈(\n)을 <br>로 변환한다.
+// white-space: pre-wrap 등으로 표시되던 줄바꿈이 붙여넣기 시 유지되도록 한다.
 // plain text는 원본을 유지하고, HTML만 수정한다.
-// 2026-02-11
+// 2026-02-12
 
 import AppKit
 
 func insertLineBreaks(in html: String) -> String {
-    let regex = #/<\/span>(?=\s*<span[^>]*>\s*<a[^>]*>)/#
-    return html.replacing(regex, with: "</span><br>")
+    // HTML 태그 밖의 텍스트 노드에서 \n을 <br>\n으로 변환
+    var result = ""
+    var inTag = false
+
+    var i = html.startIndex
+    while i < html.endIndex {
+        let ch = html[i]
+        if ch == "<" {
+            inTag = true
+            result.append(ch)
+        } else if ch == ">" {
+            inTag = false
+            result.append(ch)
+        } else if ch == "\n" && !inTag {
+            result.append(contentsOf: "<br>\n")
+        } else {
+            result.append(ch)
+        }
+        i = html.index(after: i)
+    }
+
+    return result
 }
 
 func processClipboard() {
