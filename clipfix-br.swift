@@ -7,28 +7,9 @@
 import AppKit
 
 func insertLineBreaks(in html: String) -> String {
-    // HTML 태그 밖의 텍스트 노드에서 \n을 <br>\n으로 변환
-    var result = ""
-    var inTag = false
-
-    var i = html.startIndex
-    while i < html.endIndex {
-        let ch = html[i]
-        if ch == "<" {
-            inTag = true
-            result.append(ch)
-        } else if ch == ">" {
-            inTag = false
-            result.append(ch)
-        } else if ch == "\n" && !inTag {
-            result.append(contentsOf: "<br>\n")
-        } else {
-            result.append(ch)
-        }
-        i = html.index(after: i)
-    }
-
-    return result
+    // 태그 밖의 텍스트 노드에서 \n을 <br>\n으로 변환 (이미 <br>\n인 경우 제외)
+    html.replacing(#/\n(?=[^<]*(?:<|$))/#, with: "<br>\n")
+        .replacing("<br><br>\n", with: "<br>\n")
 }
 
 func processClipboard() {
